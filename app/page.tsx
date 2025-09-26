@@ -43,9 +43,9 @@ export default function Home() {
   };
 
   const clearCanvas = () => {
-    const canvas = document.querySelector('canvas');
-    if (canvas && canvas.getContext) {
-      const ctx = (canvas as HTMLCanvasElement).getContext('2d');
+    const canvas = document.querySelector('canvas') as HTMLCanvasElement;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
