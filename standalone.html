@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI你画我猜 | AI Draw & Guess</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .game-area {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .canvas-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: crosshair;
+            background: white;
+            max-width: 100%;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 10px;
+        }
+
+        .color-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .color-btn.active {
+            border: 3px solid #333;
+        }
+
+        .size-picker {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .btn-secondary.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .result-area {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+            min-height: 100px;
+        }
+
+        .result-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        .result-content {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #4a5568;
+            white-space: pre-line;
+        }
+
+        .tips {
+            text-align: center;
+            margin-top: 20px;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .warning {
+            background: #fff5f5;
+            border: 2px solid #feb2b2;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            canvas {
+                max-width: 100%;
+                height: auto;
+            }
+
+            .controls {
+                gap: 10px;
+            }
+
+            .color-picker, .size-picker {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .btn {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+
+            .color-btn {
+                width: 30px;
+                height: 30px;
+            }
+
+            .game-area {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 AI你画我猜 | AI Draw & Guess</h1>
+            <p>在画布上画画，AI会猜你画的是什么 | Draw something and AI will guess what it is</p>
+            <p style="font-size: 0.9rem; margin-top: 10px;">Clare制作 | Made by Clare</p>
+        </header>
+
+        <div class="game-area">
+            <div class="warning">
+                ⚠️ 此版本仅支持本地绘画，AI猜测功能需要运行服务器<br>
+                This version only supports local drawing. AI guessing requires running the server<br>
+                <br>
+                请运行: node server.js 然后访问 http://localhost:3000<br>
+                Please run: node server.js then visit http://localhost:3000
+            </div>
+
+            <div class="controls" style="margin-bottom: 20px;">
+                <div class="color-picker">
+                    <button class="color-btn active" data-color="#000000" style="background: #000000"></button>
+                    <button class="color-btn" data-color="#FF0000" style="background: #FF0000"></button>
+                    <button class="color-btn" data-color="#00FF00" style="background: #00FF00"></button>
+                    <button class="color-btn" data-color="#0000FF" style="background: #0000FF"></button>
+                    <button class="color-btn" data-color="#FFFF00" style="background: #FFFF00"></button>
+                    <button class="color-btn" data-color="#FF00FF" style="background: #FF00FF"></button>
+                    <button class="color-btn" data-color="#00FFFF" style="background: #00FFFF"></button>
+                </div>
+
+                <div class="size-picker">
+                    <button class="btn btn-secondary" data-size="2">细 Thin</button>
+                    <button class="btn btn-secondary active" data-size="5">中 Medium</button>
+                    <button class="btn btn-secondary" data-size="10">粗 Thick</button>
+                </div>
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="canvas" width="600" height="400"></canvas>
+            </div>
+
+            <div class="controls" style="margin-top: 20px; justify-content: center;">
+                <button id="clearBtn" class="btn btn-danger">清空画布 Clear</button>
+                <button id="downloadBtn" class="btn btn-primary">下载图片 Download</button>
+            </div>
+
+            <div class="tips">
+                <p>提示：这是离线版本，可以画画和下载，但无法使用AI猜测功能</p>
+                <p>Tip: This is an offline version, you can draw and download, but cannot use AI guessing</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const clearBtn = document.getElementById('clearBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        let isDrawing = false;
+        let currentColor = '#000000';
+        let currentSize = 5;
+
+        // 设置画布响应式大小
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const maxWidth = Math.min(600, container.clientWidth - 40);
+            const ratio = 400 / 600;
+            canvas.style.width = maxWidth + 'px';
+            canvas.style.height = (maxWidth * ratio) + 'px';
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // 初始化画布
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        // 获取鼠标/触摸位置
+        function getPosition(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            let clientX, clientY;
+            if (e.touches && e.touches[0]) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            const x = (clientX - rect.left) * scaleX;
+            const y = (clientY - rect.top) * scaleY;
+            return { x, y };
+        }
+
+        // 开始绘画
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getPosition(e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+            e.preventDefault();
+        }
+
+        // 绘画中
+        function draw(e) {
+            if (!isDrawing) return;
+            const pos = getPosition(e);
+            ctx.strokeStyle = currentColor;
+            ctx.lineWidth = currentSize;
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            e.preventDefault();
+        }
+
+        // 结束绘画
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        // 鼠标事件
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        // 触摸事件
+        canvas.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            startDrawing(e);
+        }, { passive: false });
+        canvas.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+            draw(e);
+        }, { passive: false });
+        canvas.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            stopDrawing();
+        }, { passive: false });
+
+        // 颜色选择
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentColor = this.dataset.color;
+            });
+        });
+
+        // 画笔大小选择
+        document.querySelectorAll('.size-picker .btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.size-picker .btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentSize = parseInt(this.dataset.size);
+            });
+        });
+
+        // 清空画布
+        clearBtn.addEventListener('click', function() {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        });
+
+        // 下载图片
+        downloadBtn.addEventListener('click', function() {
+            const link = document.createElement('a');
+            link.download = 'drawing-' + new Date().getTime() + '.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    </script>
+</body>
+</html>

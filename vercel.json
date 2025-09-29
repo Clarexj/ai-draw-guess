@@ -1,0 +1,8 @@
+{
+  "buildCommand": "cd ai-draw-guess && npm install && npm run build",
+  "outputDirectory": "ai-draw-guess/.next",
+  "installCommand": "cd ai-draw-guess && npm install",
+  "devCommand": "cd ai-draw-guess && npm run dev",
+  "framework": "nextjs",
+  "rootDirectory": "ai-draw-guess"
+}
