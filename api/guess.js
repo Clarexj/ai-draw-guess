@@ -22,13 +22,15 @@ export default async function handler(req, res) {
   const API_KEY = process.env.SILICONFLOW_API_KEY || 'sk-mttcmavvdfpvedaytluvxlvfgblrgfakhbmcoglreujlqyri';
   const API_URL = 'https://api.siliconflow.cn/v1/chat/completions';
 
-  const prompt = `看这幅画，直接说出是什么，不要任何解释。格式：
-中文：[答案]
-English: [answer]
+  const prompt = `请仔细观察这幅简笔画，猜测画的是什么。即使画得很简单，也请给出你的最佳猜测。
 
-例如：
-中文：猫
-English: Cat`;
+请用以下格式回答：
+中文：[你的猜测]
+English: [your guess]
+
+如果实在看不出来，可以说：
+中文：这可能是...（给出几个可能的答案）
+English: This might be...`;
 
   try {
     const response = await fetch(API_URL, {
