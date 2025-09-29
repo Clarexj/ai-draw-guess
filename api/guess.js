@@ -22,15 +22,21 @@ export default async function handler(req, res) {
   const API_KEY = process.env.SILICONFLOW_API_KEY || 'sk-mttcmavvdfpvedaytluvxlvfgblrgfakhbmcoglreujlqyri';
   const API_URL = 'https://api.siliconflow.cn/v1/chat/completions';
 
-  const prompt = `请仔细观察这幅简笔画，猜测画的是什么。即使画得很简单，也请给出你的最佳猜测。
+  const prompt = `你是一个专业的简笔画识别助手。请观察这幅画，它可能是用简单的线条画成的。
 
-请用以下格式回答：
+分析提示：
+- 注意基本形状（圆形、方形、三角形等）
+- 观察线条的排列和组合
+- 考虑常见物品的简化画法
+- 即使很抽象，也要大胆猜测
+
+请直接回答画的是什么，格式如下：
 中文：[你的猜测]
 English: [your guess]
 
-如果实在看不出来，可以说：
-中文：这可能是...（给出几个可能的答案）
-English: This might be...`;
+如果不太确定，给出最可能的答案：
+中文：这看起来像是[主要猜测]，也可能是[备选答案]
+English: This looks like [main guess], or possibly [alternative]`;
 
   try {
     const response = await fetch(API_URL, {
@@ -58,8 +64,8 @@ English: This might be...`;
             ]
           }
         ],
-        temperature: 0.7,
-        max_tokens: 100
+        temperature: 0.8,
+        max_tokens: 150
       })
     });
 
