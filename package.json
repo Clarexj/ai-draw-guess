@@ -1,14 +1,22 @@
 {
   "name": "ai-draw-guess",
   "version": "1.0.0",
-  "description": "AI你画我猜游戏",
-  "main": "server.js",
+  "private": true,
   "scripts": {
-    "start": "node server.js"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   },
   "dependencies": {
-    "dotenv": "^16.6.1"
+    "next": "14.0.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "dotenv": "^16.4.7"
   },
-  "author": "Clare",
-  "license": "MIT"
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5"
+  }
 }

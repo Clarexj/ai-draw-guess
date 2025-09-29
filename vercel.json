@@ -1,7 +1,1 @@
-{
-  "functions": {
-    "api/guess.js": {
-      "maxDuration": 10
-    }
-  }
-}
+{}
